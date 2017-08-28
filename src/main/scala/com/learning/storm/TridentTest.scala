@@ -1,5 +1,8 @@
 package com.learning.storm
 
+import java.util
+
+import org.apache.storm.{Config, StormSubmitter}
 import org.apache.storm.trident.{TridentState, TridentTopology}
 import org.apache.storm.trident.operation.builtin.Count
 import org.apache.storm.trident.testing.{FixedBatchSpout, MemoryMapState, Split}
@@ -26,6 +29,11 @@ object TridentTest {
       .groupBy(new Fields("word"))
       .persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("count"))
       .parallelismHint(6)
+
+    val conf = new Config()
+    conf.setNumWorkers(20)
+    conf.setMaxSpoutPending(5000)
+    StormSubmitter.submitTopology("words-count-topology", conf, topology.build())
   }
 
   def main(args: Array[String]): Unit = {
